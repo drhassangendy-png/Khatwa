@@ -1,5 +1,0 @@
-bun add adhan
-bun run build
-git add package.json bun.lock
-git commit -m "fix: add adhan dependency via bun"
-git push origin main

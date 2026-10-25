@@ -1,0 +1,10 @@
+import { useState } from 'react';
+import { Scale, ChevronDown } from 'lucide-react';
+import { displayDate, number, dayKey, weekKey } from '@/lib/dates';
+import { t } from '@/lib/i18n';
+import Modal from '@/components/features/Modal';
+import WeightForm from '@/components/forms/WeightForm';
+import WeightChart from '@/components/features/WeightChart';
+import type { Habit } from '@/types';
+interface Props { habit:Habit }
+export default function WeightTracker({habit}:Props){const [open,setOpen]=useState(false),[editing,setEditing]=useState(false),latest=habit.weights[habit.weights.length-1],current=habit.weights.find(w=>weekKey(w.date)===weekKey());return <div className="border-t border-line mt-4 pt-3"><div className="flex items-center justify-between gap-2"><button className="btn text-primary px-1" aria-expanded={open} onClick={()=>setOpen(!open)}><Scale size={18}/>{latest?`${number(latest.kg)} ${t('كغ','kg')}`:t('متابعة الوزن الأسبوعي','Weekly weight tracking')}<ChevronDown size={15}/></button><button className="btn-secondary px-3" disabled={habit.startDate>dayKey()} onClick={()=>setEditing(true)}>{current?t('تعديل قياس الأسبوع','Edit this week’s entry'):t('تسجيل وزن','Log weight')}</button></div>{latest&&<p className="text-sm text-muted">{t('آخر قياس','Latest entry')}: {displayDate(latest.date)}</p>}{open&&<div className="mt-4 space-y-3">{habit.weights.length>1&&<WeightChart entries={habit.weights}/>}<p className="text-sm text-muted">{t('قياس واحد لكل أسبوع (الاثنين–الأحد). الوزن وحده لا يحدد تحسّن صحتك.','One measurement per week (Monday–Sunday). Weight alone does not determine health improvement.')}</p><ul className="max-h-48 overflow-y-auto divide-y divide-line">{[...habit.weights].reverse().map(w=><li key={w.date} className="py-2 flex justify-between"><span>{displayDate(w.date)}</span><strong className="text-primary">{number(w.kg)} {t('كغ','kg')}</strong></li>)}</ul></div>}{editing&&<Modal title={t('قياس الوزن الأسبوعي','Weekly weight entry')} onClose={()=>setEditing(false)}><WeightForm habit={habit} onClose={()=>setEditing(false)}/></Modal>}</div>;}

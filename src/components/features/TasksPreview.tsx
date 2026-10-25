@@ -1,0 +1,6 @@
+import { Link } from 'react-router-dom';
+import { Plus, ListTodo } from 'lucide-react';
+import { useApp } from '@/lib/AppContext';
+import { t } from '@/lib/i18n';
+import TaskRow from '@/components/features/TaskRow';
+export default function TasksPreview(){const {data,today,openEditor}=useApp(),tasks=data.tasks.filter(task=>task.startDate<=today&&task.endDate>=today).sort((a,b)=>a.time.localeCompare(b.time));return <section className="panel p-5"><div className="flex justify-between items-center mb-2"><h2 className="font-bold">{t('مهام اليوم','Today’s tasks')}</h2><button className="icon-btn" onClick={()=>openEditor({kind:'task'})} aria-label={t('إضافة مهمة','Add task')}><Plus size={18}/></button></div>{tasks.length?tasks.slice(0,3).map(task=><TaskRow key={task.id} task={task} compact/>):<div className="text-center py-6"><ListTodo className="text-primary mx-auto mb-3" size={25}/><p>{t('مساحة لشيء مهم','Space for something important')}</p><button className="btn text-primary mt-2" onClick={()=>openEditor({kind:'task'})}>{t('إضافة مهمة','Add task')}</button></div>}<Link to="/tasks" className="btn w-full text-muted border-t border-line mt-3">{t('عرض جميع المهام','View all tasks')}</Link></section>;}

@@ -1,0 +1,10 @@
+import { describe, it, expect } from 'vitest';
+import { INITIAL_DATA } from '@/constants/data';
+import { parseBackup, appDataSchema } from '@/lib/dataValidation';
+import { configureLocale, t } from '@/lib/i18n';
+describe('backup compatibility and localization',()=>{
+ it('imports version-2 habits without new fields',()=>{const data={dark:false,categories:[],tasks:[],habits:[{id:'old',title:'Old habit',category:'other',time:'09:00',target:30,createdAt:'2026-10-01',history:{'2026-10-01':'done'}}]};const imported=parseBackup(JSON.stringify({app:'khatwa',version:2,exportedAt:'2026-10-01',data}));expect(imported.habits[0].mode).toBe('build');expect(imported.habits[0].strict).toBe(false);expect(imported.settings.language).toBe('ar');expect(imported.habits[0].history['2026-10-01']).toBe('done');});
+ it('round-trips quit logs, prayer make-ups, freezes and settings',()=>{const data={...INITIAL_DATA,settings:{...INITIAL_DATA.settings,language:'en' as const,numerals:'latin' as const},habits:[{...INITIAL_DATA.habits[0],mode:'quit' as const,dailyLimit:2,slips:{'2026-10-20':3},quitLimits:{'2026-10-20':2},history:{'2026-10-20':'freeze' as const},makeups:{'2026-10-19':'2026-10-20'},prayers:{'2026-10-20':['fajr' as const]}}]};expect(parseBackup(JSON.stringify({app:'khatwa',version:3,exportedAt:'now',data}))).toEqual(data);});
+ it('rejects duplicate prayer buttons and invalid monthly dates',()=>{expect(appDataSchema.safeParse({...INITIAL_DATA,habits:[{...INITIAL_DATA.habits[0],prayers:{'2026-10-20':['fajr','fajr']}}]}).success).toBe(false);expect(appDataSchema.safeParse({...INITIAL_DATA,habits:[{...INITIAL_DATA.habits[0],monthDay:32}]}).success).toBe(false);});
+ it('localizes numeral formats independently of language',()=>{configureLocale({...INITIAL_DATA.settings,language:'en',numerals:'latin'});expect(t('٣ جلسات','3 sessions')).toBe('3 sessions');configureLocale({...INITIAL_DATA.settings,language:'en',numerals:'arabic'});expect(t('٣ جلسات','3 sessions')).toBe('٣ sessions');configureLocale(INITIAL_DATA.settings);});
+});

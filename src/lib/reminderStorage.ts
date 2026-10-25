@@ -1,0 +1,2 @@
+export function readReminderLog():string[]{try{return (localStorage.getItem('khatwa-reminder-log')||'').split('|').filter(Boolean);}catch{return [];}}
+export function storeReminder(key:string,today:string){try{localStorage.setItem('khatwa-reminder-log',[...readReminderLog().filter(item=>item.startsWith(today)),key].join('|'));}catch{console.warn('Reminder storage unavailable; in-memory deduplication remains active');}}

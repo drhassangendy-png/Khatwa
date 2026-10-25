@@ -1,0 +1,5 @@
+import { Footprints, Flame, ChartNoAxesCombined } from 'lucide-react';
+import { useApp } from '@/lib/AppContext';
+import { number, progress, streak } from '@/lib/dates';
+import { t } from '@/lib/i18n';
+export default function StatCards(){const {data}=useApp(),steps=data.habits.reduce((sum,h)=>sum+progress(h),0),target=data.habits.reduce((sum,h)=>sum+h.target,0),longest=Math.max(0,...data.habits.map(h=>streak(h,true)));const stats=[{label:t('خطواتك / نقاطك','Your steps / points'),value:number(steps),Icon:Footprints},{label:t('أطول سلسلة استمرار','Longest streak'),value:number(longest),Icon:Flame},{label:t('نسبة إنجاز الأهداف','Target completion'),value:`${number(target?Math.round(steps/target*100):0)}%`,Icon:ChartNoAxesCombined}];return <section aria-label={t('ملخص تقدمك','Progress overview')} className="grid sm:grid-cols-3 gap-4">{stats.map(({label,value,Icon})=><div key={label} className="panel p-5"><div className="flex justify-between items-center gap-3"><p className="text-muted text-sm">{label}</p><Icon size={20} className="text-primary"/></div><strong className="text-3xl font-bold block mt-3">{value}</strong></div>)}</section>;}

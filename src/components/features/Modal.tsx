@@ -1,0 +1,5 @@
+import { useEffect, useRef, type ReactNode } from 'react';
+import { X } from 'lucide-react';
+import { t } from '@/lib/i18n';
+interface Props { title:string; onClose:()=>void; children:ReactNode }
+export default function Modal({title,onClose,children}:Props){const ref=useRef<HTMLDialogElement>(null);useEffect(()=>{const dialog=ref.current;dialog?.showModal();return()=>dialog?.close();},[]);return <dialog ref={ref} aria-labelledby="modal-title" onCancel={onClose} onClick={event=>{if(event.target===ref.current){const r=ref.current.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)onClose();}}} className="bg-surface text-foreground border border-line rounded-2xl p-0 w-[calc(100%_-_32px)] max-w-lg max-h-[90vh] backdrop:bg-foreground/30 backdrop:backdrop-blur-sm"><div className="flex items-center justify-between p-5 border-b border-line"><h2 id="modal-title" className="text-xl font-bold">{title}</h2><button className="icon-btn" onClick={onClose} aria-label={t('إغلاق','Close')}><X size={20}/></button></div>{children}</dialog>;}

@@ -1,0 +1,8 @@
+import Modal from '@/components/features/Modal';
+import { useApp } from '@/lib/AppContext';
+import { exportJson } from '@/lib/exportData';
+import { number } from '@/lib/dates';
+import { t } from '@/lib/i18n';
+import type { AppData } from '@/types';
+interface Props { pending:{data:AppData;source:string}; onClose:()=>void }
+export default function RestoreDialog({pending,onClose}:Props){const {data,replaceData}=useApp();return <Modal title={t('استعادة نسخة احتياطية؟','Restore a backup?')} onClose={onClose}><div className="p-6 space-y-4"><p>{t('المصدر','Source')}: {pending.source}</p><p className="text-primary font-bold">{number(pending.data.habits.length)} {t('عادات','habits')} · {number(pending.data.tasks.length)} {t('مهام','tasks')} · {number(pending.data.categories.length)} {t('تصنيفات','categories')}</p><p className="text-muted">{t('ستستبدل النسخة جميع بيانات هذا الجهاز وإعداداته. لن يحدث دمج، ولن تتغير النسخة السحابية. الأيام المنتهية بعد النسخ تُحدّث وفق جدول العادة.','The backup replaces all device data and settings, without merging or changing the cloud backup. Elapsed days since the backup are settled according to each habit’s schedule.')}</p><button className="btn-secondary w-full" onClick={()=>exportJson(data)}>{t('تنزيل بياناتي الحالية أولًا','Download my current data first')}</button><div className="flex gap-3"><button className="btn-primary flex-1" onClick={()=>{if(replaceData(pending.data))onClose();}}>{t('تأكيد الاستعادة والاستبدال','Confirm restore & replace')}</button><button className="btn-secondary" onClick={onClose}>{t('إلغاء','Cancel')}</button></div></div></Modal>;}

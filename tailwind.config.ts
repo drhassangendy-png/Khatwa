@@ -1,0 +1,2 @@
+import type { Config } from 'tailwindcss';
+export default { darkMode: 'class', content: ['./index.html', './src/**/*.{ts,tsx}'], theme: { extend: { colors: { background: 'hsl(var(--background))', surface: 'hsl(var(--surface))', foreground: 'hsl(var(--foreground))', muted: 'hsl(var(--muted))', primary: 'hsl(var(--primary))', soft: 'hsl(var(--soft))', line: 'hsl(var(--line))', accent: 'hsl(var(--accent))', danger: 'hsl(var(--danger))' }, fontFamily: { sans: ['Tajawal', 'sans-serif'] } } }, plugins: [] } satisfies Config;

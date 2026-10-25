@@ -1,0 +1,22 @@
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
+import { settleHabit, freezeRemaining, DEFAULT_SETTINGS, DEFAULT_OPTIONS } from '@/lib/habitEngine';
+import { progress, streak, outcomeOn, completedDays } from '@/lib/dates';
+import type { Habit } from '@/types';
+const habit=(patch:Partial<Habit>={}):Habit=>({...DEFAULT_OPTIONS,id:'test',title:'test',category:'other',time:'09:00',target:100,weeklyTarget:3,weeklyDays:[1,3,5],trainingType:'full-body',schedule:'daily',hijriAdjustment:0,history:{},slips:{},quitLimits:{},prayers:{},makeups:{},weights:[],createdAt:'2026-10-20',trackingFrom:'2026-10-20',settledThrough:'2026-10-19',startDate:'2026-10-20',endDate:'2027-12-31',...patch});
+beforeEach(()=>{vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-25T12:00:00'));});
+afterEach(()=>vi.useRealTimers());
+describe('gentle cumulative tracking',()=>{
+ it('keeps the streak after one missed due day',()=>{const h=habit({startDate:'2026-10-23',trackingFrom:'2026-10-23',history:{'2026-10-23':'done','2026-10-24':'skip'}});expect(streak(h)).toBe(1);expect(progress(h)).toBe(0);});
+ it('resets only after two missed due days',()=>{const h=habit({startDate:'2026-10-22',trackingFrom:'2026-10-22',history:{'2026-10-22':'done','2026-10-23':'skip','2026-10-24':'skip'}});expect(streak(h)).toBe(0);});
+ it('strict mode resets after one miss',()=>expect(streak(habit({strict:true,startDate:'2026-10-23',trackingFrom:'2026-10-23',history:{'2026-10-23':'done','2026-10-24':'skip'}}))).toBe(0));
+ it('freeze protects without awarding or deducting points',()=>{const h=habit({startDate:'2026-10-23',trackingFrom:'2026-10-23',history:{'2026-10-23':'done','2026-10-24':'freeze'}});expect(progress(h)).toBe(1);expect(streak(h)).toBe(1);expect(freezeRemaining({habits:[h],tasks:[],categories:[],dark:false,settings:DEFAULT_SETTINGS})).toBe(1);expect(freezeRemaining({habits:[h],tasks:[],categories:[],dark:false,settings:DEFAULT_SETTINGS},'2026-11')).toBe(2);});
+ it('does not settle rest days as missed',()=>{const h=settleHabit(habit({schedule:'weekly',trackingFrom:'2026-10-23',startDate:'2026-10-23',settledThrough:'2026-10-22'}));expect(h.history['2026-10-23']).toBe('skip');expect(h.history['2026-10-24']).toBeUndefined();});
+ it('deducts successive steps cumulatively without erasing history',()=>{const history:Habit['history']={};for(let day=1;day<=30;day++)history[`2026-09-${String(day).padStart(2,'0')}`]='done';history['2026-10-01']='skip';history['2026-10-02']='skip';expect(progress(habit({startDate:'2026-09-01',trackingFrom:'2026-09-01',history}))).toBe(28);});
+ it('monthly off days do not interrupt a streak',()=>{const h=habit({schedule:'monthly',monthDay:15,startDate:'2026-09-01',trackingFrom:'2026-09-01',history:{'2026-09-15':'done','2026-10-15':'done'}});expect(streak(h)).toBe(2);});
+ it('settlement is idempotent',()=>{const h=settleHabit(habit());expect(settleHabit(h)).toBe(h);});
+ it('counts zero-limit quit days and fails only above the limit',()=>{const h=settleHabit(habit({mode:'quit',dailyLimit:0,slips:{'2026-10-24':1}}));expect(outcomeOn(h,'2026-10-23')).toBe('done');expect(outcomeOn(h,'2026-10-24')).toBe('skip');expect(completedDays(h)).toBe(4);expect(progress(h)).toBe(3);});
+ it('accepts counts equal to a nonzero limit',()=>{const h=habit({mode:'quit',dailyLimit:2,slips:{'2026-10-24':2,'2026-10-25':3}});expect(outcomeOn(h,'2026-10-24')).toBe('done');expect(outcomeOn(h,'2026-10-25')).toBe('skip');});
+ it('stores closed-day limits rather than rewriting them on edit',()=>{const h=settleHabit(habit({mode:'quit',dailyLimit:2,slips:{'2026-10-24':2}}));expect(outcomeOn({...h,dailyLimit:0},'2026-10-24')).toBe('done');});
+ it('partial prayers preserve progress without a penalty',()=>{const h=settleHabit(habit({mode:'prayers',history:{'2026-10-23':'done'},prayers:{'2026-10-24':['fajr']}}));expect(h.history['2026-10-24']).toBe('partial');expect(progress(h)).toBe(1);expect(streak(h)).toBe(1);});
+ it('quit recovery does not falsify a past successful day',()=>{vi.setSystemTime(new Date('2026-10-26T12:00:00'));const h=habit({mode:'quit',slips:{'2026-10-24':1},history:{'2026-10-24':'skip','2026-10-25':'done'},makeups:{'2026-10-24':'2026-10-25'}});expect(outcomeOn(h,'2026-10-24')).toBe('partial');expect(completedDays(h)).toBe(1);});
+});

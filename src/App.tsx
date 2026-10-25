@@ -1,0 +1,21 @@
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import LocalizedToaster from '@/components/features/LocalizedToaster';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import AuthProvider from '@/components/features/AuthProvider';
+import AppProvider from '@/components/features/AppProvider';
+import ErrorBoundary from '@/components/features/ErrorBoundary';
+import Sidebar from '@/components/layout/Sidebar';
+import Header from '@/components/layout/Header';
+import NotFound from '@/pages/NotFound';
+const queryClient=new QueryClient();
+const Account=lazy(()=>import('@/pages/Account'));
+const Login=lazy(()=>import('@/pages/Login'));
+const OAuthCallback=lazy(()=>import('@/pages/OAuthCallback'));
+const Dashboard=lazy(()=>import('@/pages/Dashboard'));
+const Habits=lazy(()=>import('@/pages/Habits'));
+const Spiritual=lazy(()=>import('@/pages/Spiritual'));
+const Tasks=lazy(()=>import('@/pages/Tasks'));
+const Stats=lazy(()=>import('@/pages/Stats'));
+const Settings=lazy(()=>import('@/pages/Settings'));
+export default function App(){return <ErrorBoundary><QueryClientProvider client={queryClient}><BrowserRouter><AuthProvider><AppProvider><Sidebar/><div className="app-main"><Header/><main className="p-5 lg:p-8 xl:px-10 pb-24 lg:pb-8 max-w-[1600px] mx-auto"><Suspense fallback={<div className="panel p-10 text-center text-muted" role="status">خطوة · Khatwa…</div>}><Routes><Route path="/" element={<Dashboard/>}/><Route path="/habits" element={<Habits/>}/><Route path="/spiritual" element={<Spiritual/>}/><Route path="/tasks" element={<Tasks/>}/><Route path="/stats" element={<Stats/>}/><Route path="/account" element={<Account/>}/><Route path="/settings" element={<Settings/>}/><Route path="/login" element={<Login/>}/><Route path="/auth/callback" element={<OAuthCallback/>}/><Route path="/oauth/callback" element={<OAuthCallback/>}/><Route path="*" element={<NotFound/>}/></Routes></Suspense></main></div><LocalizedToaster/></AppProvider></AuthProvider></BrowserRouter></QueryClientProvider></ErrorBoundary>;}

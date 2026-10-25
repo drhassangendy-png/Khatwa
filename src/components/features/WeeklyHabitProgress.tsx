@@ -1,0 +1,9 @@
+import { Check, Snowflake } from 'lucide-react';
+import { useApp } from '@/lib/AppContext';
+import { displayDate, habitScheduled, number, outcomeOn } from '@/lib/dates';
+import { WEEK_DAYS } from '@/constants/habits';
+import { weeklySummary } from '@/lib/weeklyHabits';
+import { t } from '@/lib/i18n';
+import type { Habit } from '@/types';
+interface Props { habit:Habit }
+export default function WeeklyHabitProgress({habit}:Props){const {today}=useApp(),week=weeklySummary(habit,today);return <section className="bg-soft p-4 rounded-xl mt-3"><div className="flex flex-wrap justify-between gap-2"><h4 className="font-bold">{t('إنجاز هذا الأسبوع','This week’s progress')}</h4><p className="text-primary font-bold">{number(week.completed)} / {number(week.target)}</p></div><p className="text-sm text-muted mt-1">{displayDate(week.start)} — {displayDate(week.end)}</p><ul className="grid grid-cols-4 sm:grid-cols-7 gap-2 mt-3">{week.dates.map((date,index)=>{const due=habitScheduled(habit,date),outcome=outcomeOn(habit,date);return <li key={date} aria-current={date===today?'date':undefined} title={displayDate(date)} className={`rounded-lg p-2 text-center border ${outcome==='done'?'bg-primary text-surface border-primary':'bg-surface text-muted border-line'} ${date===today?'ring-2 ring-primary':''}`}><span className="block text-xs">{t(WEEK_DAYS[index].label)}</span><span className="min-h-6 flex items-center justify-center mt-1">{outcome==='done'?<Check size={16}/>:outcome==='freeze'?<Snowflake size={16}/>:<span className="text-xs">{due?t('موعد','Due'):t('راحة','Rest')}</span>}</span></li>;})}</ul><p className="text-xs text-muted mt-3">{t('الأسبوع من الاثنين إلى الأحد. يوم الإقلاع الحالي ضمن الحد هو تقدم مؤقت حتى منتصف الليل.','Weeks run Monday–Sunday. Today’s quit progress is provisional until midnight.')}</p></section>;}

@@ -1,0 +1,6 @@
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
+import { displayDate, number } from '@/lib/dates';
+import { t } from '@/lib/i18n';
+import type { WeightEntry } from '@/types';
+interface Props { entries:WeightEntry[] }
+export default function WeightChart({entries}:Props){return <div className="h-44 w-full" dir="ltr" role="img" aria-label={t('تطور قياسات الوزن الأسبوعية','Weekly weight measurements')}><ResponsiveContainer width="100%" height="100%"><LineChart data={entries} margin={{top:8,right:16,left:-20,bottom:8}}><XAxis dataKey="date" tickFormatter={date=>displayDate(String(date))} tick={{fill:'hsl(var(--muted))',fontSize:12}} minTickGap={40}/><YAxis tickFormatter={value=>number(Number(value))} domain={['dataMin - 1','dataMax + 1']} tick={{fill:'hsl(var(--muted))',fontSize:12}}/><Tooltip labelFormatter={value=>displayDate(String(value))} formatter={value=>[`${number(Number(value))} ${t('كغ','kg')}`,t('الوزن','Weight')]} contentStyle={{background:'hsl(var(--surface))',color:'hsl(var(--foreground))',border:'1px solid hsl(var(--line))',borderRadius:12}}/><Line type="monotone" dataKey="kg" stroke="hsl(var(--primary))" strokeWidth={2} dot={{r:4,fill:'hsl(var(--primary))'}} isAnimationActive={false}/></LineChart></ResponsiveContainer></div>;}

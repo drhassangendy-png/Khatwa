@@ -16,7 +16,7 @@ This app runs in the existing React + Vite + TypeScript project. All implementat
 
 Daily, weekly quota with chosen weekdays, arbitrary weekdays, and monthly date / last-day schedules share one due-date engine. A nonexistent monthly date is skipped, not moved. Fasting Monday/Thursday and Umm al-Qura White Days (13–15 Hijri, manual ±1 day) use the same engine. The Habits page shows only today's due habits. Progress provides access to all habits for editing and recovery.
 
-`adhan` calculates five-prayer times locally using the Egyptian Survey Authority and standard Asr. Coordinates are explicitly supplied via browser location permission or manual entry. Displayed times use the saved IANA time zone; verify them with the local mosque. Daily tracking dates and ordinary habit reminders use the device calendar and clock.
+A dependency-free local solar calculator uses Meeus solar-position equations and the Egyptian Survey Authority parameters (Fajr 19.5°, Isha 17.5°, standard one-shadow Asr, and Dhuhr one minute after solar noon). Calculations produce UTC instants; displayed times use the saved IANA time zone. Coordinates are explicitly supplied via browser location permission or manual entry and are never sent to an external service. At high latitudes, twilight is bounded by the midpoint of the night when sunrise and sunset exist; unavailable polar solar events are omitted with an explanation, not assigned invented times. Verify calculated times with the local mosque. Daily tracking dates and ordinary habit reminders use the device calendar and clock.
 
 ## Notifications
 
@@ -28,6 +28,6 @@ Local state uses `khatwa-v1`. JSON version 3 preserves counters, closed-day limi
 
 ## Regression tests
 
-Run `npx vitest run --config vitest.config.ts` from the project root. Tests cover schedules, leap years, White Days, gentle/strict streaks, freezes, settlement idempotence, quit thresholds, recovery, prayer partial days, backup migration and numerals. These tests have been added but could not be executed by the editor toolset in this session.
+Run `npx vitest run --config vitest.config.ts` from the project root. Tests cover schedules, leap years, White Days, gentle/strict streaks, freezes, settlement idempotence, quit thresholds, recovery, prayer partial days, backup migration and numerals. Prayer calculation tests also cover Egyptian-method reference fixtures, valid chronological times, device-time-zone independence, adjacent UTC dates, invalid inputs, high-latitude twilight and polar day. Reference fixtures are static; the app and tests make no prayer-service requests. These tests have been added but could not be executed by the editor toolset in this session.
 
 Google OAuth implementation and PKCE popup flow are preserved. Provider credentials remain a Cloud Auth Settings requirement; this session does not configure or verify Google sign-in.

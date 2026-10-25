@@ -1,5 +1,8 @@
-bun add adhan
+# Run these commands in a real repository terminal after pulling the changes.
+# Saving commands in this file does not execute them.
+# Dependency manifests and lockfiles cannot be changed by the OnSpace editor.
+bun remove adhan
 bun run build
 git add package.json bun.lock
-git commit -m "fix: add adhan dependency via bun"
+git commit -m "fix: remove adhan dependency"
 git push origin main
